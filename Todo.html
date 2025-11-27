@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To‑Do List</title>
+<style>
+:root {
+    --bg: linear-gradient(135deg, #a1c4fd, #c2e9fb); /* خلفية نهارية متدرجة */
+    --card: rgba(255,255,255,0.85); /* لون البطاقات */
+    --text: #222; /* لون النص */
+    --task: #ffffff; /* خلفية المهام */
+    --accent: #ff6f61; /* لون الزر والمربعات */
+    --shadow: rgba(0,0,0,0.15); /* ظل خفيف */
+}
+
+.dark {
+    --bg: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* خلفية داكنة */
+    --card: rgba(40,40,40,0.85);
+    --text: #fff;
+    --task: #333;
+    --accent: #ff6f61;
+    --shadow: rgba(0,0,0,0.4);
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding-top: 60px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.container {
+    background: var(--card);
+    padding: 25px;
+    width: 350px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px var(--shadow);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-box {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.input-box input {
+    flex: 1;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 15px;
+}
+
+.input-box button {
+    padding: 12px 18px;
+    margin-left: 10px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.input-box button:hover {
+    transform: scale(1.05);
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    list-style: none;
+    padding: 12px 15px;
+    background: var(--task);
+    margin-bottom: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px var(--shadow);
+    transition: transform 0.2s ease;
+}
+
+ul li:hover {
+    transform: scale(1.02);
+}
+
+ul li.done span.task-text {
+    text-decoration: line-through;
+    color: gray;
+}
+
+.check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    margin-right: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.check.checked {
+    background: var(--accent);
+}
+
+.check.checked::after {
+    content: "✔";
+    color: white;
+    font-size: 14px;
+}
+
+.delete-btn {
+    cursor: pointer;
+    color: red;
+    font-size: 18px;
+    padding-left: 10px;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    transform: scale(1.2);
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>To‑Do List</h2>
+    <div class="input-box">
+        <input type="text" id="taskInput" placeholder="Enter a task..." />
+        <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", loadTasks);
+
+function addTask() {
+    const taskInput = document.getElementById('taskInput');
+    const taskText = taskInput.value.trim();
+    if (taskText === '') return;
+
+    createTaskElement(taskText, false);
+    saveTasks();
+    taskInput.value = '';
+}
+
+function createTaskElement(text, completed) {
+    const li = document.createElement('li');
+
+    const checkbox = document.createElement('div');
+    checkbox.className = 'check';
+    if (completed) checkbox.classList.add('checked');
+
+    checkbox.onclick = () => {
+        checkbox.classList.toggle('checked');
+        li.classList.toggle('done');
+        saveTasks();
+    };
+
+    const span = document.createElement('span');
+    span.textContent = text;
+    span.className = 'task-text';
+
+    const deleteBtn = document.createElement('span');
+    deleteBtn.textContent = "✕";
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.onclick = () => {
+        li.remove();
+        saveTasks();
+    };
+
+    li.appendChild(checkbox);
+    li.appendChild(span);
+    li.appendChild(deleteBtn);
+    document.getElementById('taskList').appendChild(li);
+
+    if (completed) li.classList.add('done');
+}
+
+function saveTasks() {
+    const tasks = [];
+    document.querySelectorAll('#taskList li').forEach(li => {
+        tasks.push({
+            text: li.querySelector('.task-text').textContent,
+            done: li.classList.contains('done')
+        });
+    });
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    const data = JSON.parse(localStorage.getItem('tasks')) || [];
+    data.forEach(t => createTaskElement(t.text, t.done));
+}
+</script>
+</body>
+</html>
